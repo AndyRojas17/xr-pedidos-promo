@@ -7,3 +7,4 @@ Thumbs.db
 *.xls
 *.xlsx
 *.csv
+!data/*.csv
