@@ -38,15 +38,23 @@ st.markdown("""
 }
 .xr-card.red  { border-top: 4px solid #CC0000; }
 .xr-card.blue { border-top: 4px solid #005BAC; }
+/* Quitar subrayado de todo el contenido interno */
+.xr-card * { text-decoration: none !important; }
 .xr-card-icon  { font-size: 2.2rem; margin-bottom: 10px; }
 .xr-card-title { font-size: 1.2rem; font-weight: 800; color: #1A1A1A; }
 .xr-card-desc  { color: #666; font-size: 0.9rem; margin-top: 8px; line-height: 1.5; }
 .xr-card-arrow { display: inline-block; margin-top: 16px; font-size: 0.9rem;
                   font-weight: 700; color: #CC0000; }
 .xr-card.blue .xr-card-arrow { color: #005BAC; }
+/* Responsive: en móvil apilar las tarjetas verticalmente */
+.xr-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 640px) {
+    .xr-cards-grid { grid-template-columns: 1fr; gap: 16px; }
+    .xr-card { padding: 20px 18px; }
+}
 </style>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div class="xr-cards-grid">
 
   <a href="/Pedidos_Promo" class="xr-card red">
     <div class="xr-card-icon">🛒</div>
