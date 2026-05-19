@@ -165,10 +165,10 @@ with col_logo:
 with col_title:
     st.markdown("""
     <div style="padding-top:8px">
-        <div style="font-size:1.9rem;font-weight:900;color:#FFFFFF;line-height:1">
+        <div style="font-size:1.9rem;font-weight:900;color:#CC0000;line-height:1">
             XR Pedidos Promo
         </div>
-        <div style="font-size:0.9rem;color:#AAAAAA;margin-top:4px">
+        <div style="font-size:0.9rem;color:#555555;margin-top:4px">
             Sistema de recomendación de compra — Repuestos Honda
         </div>
     </div>
