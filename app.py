@@ -16,37 +16,60 @@ st.markdown('<p style="color:#666;margin-top:-12px">Selecciona una herramienta p
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2, gap="large")
+st.markdown("""
+<style>
+.xr-card {
+    display: block;
+    text-decoration: none;
+    background: #FAFAFA;
+    border: 1.5px solid #E0E0E0;
+    border-radius: 12px;
+    padding: 28px 24px;
+    min-height: 180px;
+    transition: all 0.18s ease;
+    cursor: pointer;
+}
+.xr-card:hover {
+    background: #FFFFFF;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+    transform: translateY(-3px);
+    border-color: #BBBBBB;
+    text-decoration: none;
+}
+.xr-card.red  { border-top: 4px solid #CC0000; }
+.xr-card.blue { border-top: 4px solid #005BAC; }
+.xr-card-icon  { font-size: 2.2rem; margin-bottom: 10px; }
+.xr-card-title { font-size: 1.2rem; font-weight: 800; color: #1A1A1A; }
+.xr-card-desc  { color: #666; font-size: 0.9rem; margin-top: 8px; line-height: 1.5; }
+.xr-card-arrow { display: inline-block; margin-top: 16px; font-size: 0.9rem;
+                  font-weight: 700; color: #CC0000; }
+.xr-card.blue .xr-card-arrow { color: #005BAC; }
+</style>
 
-with col1:
-    st.markdown("""
-    <div style="background:#FAFAFA;border:1.5px solid #E0E0E0;border-top:4px solid #CC0000;
-                border-radius:12px;padding:28px 24px;min-height:180px">
-        <div style="font-size:2rem;margin-bottom:8px">🛒</div>
-        <div style="font-size:1.2rem;font-weight:800;color:#1A1A1A">Pedidos Promo</div>
-        <div style="color:#666;font-size:0.9rem;margin-top:8px;line-height:1.5">
-            Analiza historial de ventas, stock actual y lista promocional Honda
-            para generar el TOP 60 de productos recomendados a pedir.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
-    st.page_link("pages/1_Pedidos_Promo.py", label="Ir a Pedidos Promo →", use_container_width=True)
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
 
-with col2:
-    st.markdown("""
-    <div style="background:#FAFAFA;border:1.5px solid #E0E0E0;border-top:4px solid #005BAC;
-                border-radius:12px;padding:28px 24px;min-height:180px">
-        <div style="font-size:2rem;margin-bottom:8px">🔍</div>
-        <div style="font-size:1.2rem;font-weight:800;color:#1A1A1A">Compatibilidades</div>
-        <div style="color:#666;font-size:0.9rem;margin-top:8px;line-height:1.5">
-            Busca códigos de repuestos y modelos compatibles. Escribe el modelo
-            o nombre del repuesto y encuentra todo lo que le aplica.
-        </div>
+  <a href="/Pedidos_Promo" class="xr-card red">
+    <div class="xr-card-icon">🛒</div>
+    <div class="xr-card-title">Pedidos Promo</div>
+    <div class="xr-card-desc">
+      Analiza historial de ventas, stock actual y lista promocional Honda
+      para generar el TOP 60 de productos recomendados a pedir.
     </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
-    st.page_link("pages/2_Compatibilidades.py", label="Ir a Compatibilidades →", use_container_width=True)
+    <div class="xr-card-arrow">Ir a Pedidos Promo →</div>
+  </a>
+
+  <a href="/Compatibilidades" class="xr-card blue">
+    <div class="xr-card-icon">🔍</div>
+    <div class="xr-card-title">Compatibilidades</div>
+    <div class="xr-card-desc">
+      Busca códigos de repuestos y modelos compatibles. Escribe el modelo
+      o nombre del repuesto y encuentra todo lo que le aplica.
+    </div>
+    <div class="xr-card-arrow">Ir a Compatibilidades →</div>
+  </a>
+
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown('<hr style="border-top:1px solid #EEE">', unsafe_allow_html=True)
