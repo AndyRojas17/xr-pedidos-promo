@@ -309,15 +309,20 @@ def analizar(f_hist, f_promo_, f_stk):
         row = df_stock_raw[df_stock_raw[cod_col] == code]
         return float(row.iloc[0]['STOCK']) if len(row) else 0
 
-    def cobertura(desc, interm):
-        if interm:  return 2
+    def cobertura(desc, interm, trend):
+        # Intermitente siempre 2 meses
+        if interm: return 2
+        # BAJANDO: máximo 4 meses aunque descuento sea alto
+        if trend == 'BAJANDO':
+            return 4 if desc >= 0.40 else 3
+        # Normal según descuento promo
         if desc >= 0.50: return 6
         if desc >= 0.40: return 4
         return 3
 
     def qty_rec(avg, stk, trend, interm, cant_min, desc):
         if avg == 0: return 0
-        cob = cobertura(desc, interm)
+        cob = cobertura(desc, interm, trend)
         aj  = {'CRECIENDO':1.20,'CRECIENTE NUEVO':1.15,'ESTABLE':1.0,'BAJANDO':0.80}.get(trend,1.0)
         dem = avg * cob * aj
         q   = max(0.0, dem - stk)
@@ -338,9 +343,12 @@ def analizar(f_hist, f_promo_, f_stk):
         p.append({'CRECIENDO':'Tendencia creciente','CRECIENTE NUEVO':'Tendencia nueva al alza',
                   'BAJANDO':'Tendencia a la baja - pedir con cautela',
                   'ESTABLE':'Rotacion estable'}.get(trend,''))
-        if desc >= 0.50:  p.append('descuento promo alto (%.0f%%) - cobertura %dm' % (desc*100, cob))
-        elif desc >= 0.40:p.append('descuento promo %.0f%% - cobertura %dm' % (desc*100, cob))
-        else:             p.append('descuento %.0f%% - cobertura %dm' % (desc*100, cob))
+        if desc >= 0.50 and trend != 'BAJANDO':
+            p.append('descuento promo alto (%.0f%%) - cobertura %dm' % (desc*100, cob))
+        elif desc >= 0.40:
+            p.append('descuento promo %.0f%% - cobertura %dm' % (desc*100, cob))
+        else:
+            p.append('descuento %.0f%% - cobertura %dm' % (desc*100, cob))
         if interm: p.append('venta intermitente (%d/%d meses)' % (freq, n_meses))
         elif pico: p.append('pico aislado excluido del promedio')
         if avg > 0: p.append('promedio %.1f und/mes' % avg)
@@ -370,30 +378,44 @@ def analizar(f_hist, f_promo_, f_stk):
         code     = pr['Codigo']
         desc     = float(pr['Desc'])
         cant_min = float(pr['CantMinima'])
+        precio_of = float(pr['PrecioOfertaUSD'])
         info     = analizar_prod(code)
         stk      = get_stk(code)
-        cob      = cobertura(desc, info['intermitente'])
+        cob      = cobertura(desc, info['intermitente'], info['trend'])
         q        = qty_rec(info['avg'], stk, info['trend'], info['intermitente'], cant_min, desc)
         est      = estado(stk, q, info['avg'])
         mot      = motivo(stk, q, info['trend'], info['avg'], info['freq'],
                           info['intermitente'], info['pico'], desc, cob)
         sc       = score_fn(info['avg'], stk, info['trend'], info['freq'],
                             info['intermitente'], q, desc)
+        stk_months = round(stk / info['avg'], 1) if info['avg'] > 0 else 999
         rows.append({
             'Codigo': code, 'Descripcion': pr['Descripcion'],
             'Modelo aplicacion': pr['Modelo'], 'Tendencia': info['trend'],
             'Stock real': int(stk), 'Cant recomendada': q,
+            'Inversion': round(q * precio_of, 2),
             'Estado compra': est, 'Motivo': mot,
             '_avg': info['avg'], '_desc': desc,
             '_precio_pub': float(pr['PrecioPublico']),
-            '_precio_of': float(pr['PrecioOfertaUSD']),
+            '_precio_of': precio_of,
             '_interm': info['intermitente'], '_score': sc,
             '_historial': info['trend'] != 'SIN HISTORIAL',
+            '_stk_months': stk_months,
+            '_cob': cob,
         })
 
     df_all = pd.DataFrame(rows)
-    df_p   = df_all[df_all['Cant recomendada'] > 0].sort_values('_score', ascending=False)
-    df_ok  = df_all[(df_all['Cant recomendada']==0) & df_all['_historial']].sort_values('_score', ascending=False)
+
+    # Productos que necesitan pedido
+    df_p = df_all[df_all['Cant recomendada'] > 0].sort_values('_score', ascending=False)
+
+    # STOCK SUFICIENTE: solo los que NO tienen sobrestock extremo (< 2x cobertura objetivo)
+    df_ok = df_all[
+        (df_all['Cant recomendada'] == 0) &
+        df_all['_historial'] &
+        (df_all['_stk_months'] < df_all['_cob'] * 2)
+    ].sort_values('_score', ascending=False)
+
     n_p    = min(len(df_p), 60)
     df_rep = pd.concat([df_p.head(n_p), df_ok.head(60-n_p)]).head(60).copy()
 
@@ -421,8 +443,8 @@ def generar_excel(df, fecha_str):
     ws = wb.active
     ws.title = 'RECOMENDACION COMPRA'
 
-    # Titulo
-    ws.merge_cells('A1:J1')
+    # Titulo — 12 columnas (A:L)
+    ws.merge_cells('A1:L1')
     c = ws['A1']
     c.value = 'XR MOTO STORE — TOP 60 RECOMENDACION DE COMPRA — LISTA PROMOCIONAL  |  %s' % fecha_str
     c.font  = Font(name='Arial', bold=True, size=12, color='FFFFFF')
@@ -430,17 +452,21 @@ def generar_excel(df, fecha_str):
     c.alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[1].height = 26
 
-    ws.merge_cells('A2:J2')
+    ws.merge_cells('A2:L2')
     c = ws['A2']
-    c.value = 'Cobertura: 6m (desc>50%) / 4m (40-50%) / 3m (<40%) / 2m si intermitente  |  Tendencia meses completos  |  Picos excluidos  |  Ajuste tendencia max +/-20%'
+    c.value = ('Cobertura: 6m (desc>50%) / 4m (40-50%) / 3m (<40%) / max 4m si BAJANDO / 2m si intermitente'
+               '  |  Tendencia meses completos  |  Picos excluidos  |  Ajuste tendencia max +/-20%')
     c.font  = Font(name='Arial', italic=True, size=8, color='595959')
     c.alignment = Alignment(horizontal='center')
     ws.row_dimensions[2].height = 13
 
-    headers    = ['Codigo','Descripcion','Modelo aplicacion','Tendencia','Stock real',
-                  'Desc. Promo','Precio Oferta\n(USD)','Cantidad recomendada\na pedir',
-                  'Estado compra','Motivo de Recomendacion']
-    col_widths = [18,34,32,18,11,11,12,14,22,70]
+    # Col 1:#  2:Codigo  3:Descripcion  4:Modelo  5:Tendencia  6:Stock real
+    #      7:Desc.Promo  8:Precio Oferta  9:Cant recomendada  10:Inversion
+    #      11:Estado  12:Motivo
+    headers    = ['#', 'Codigo', 'Descripcion', 'Modelo aplicacion', 'Tendencia', 'Stock real',
+                  'Desc.\nPromo', 'Precio Oferta\n(USD)', 'Cant.\na pedir',
+                  'Inversión\n(USD)', 'Estado compra', 'Motivo de Recomendacion']
+    col_widths = [4, 18, 34, 30, 18, 10, 8, 11, 9, 12, 22, 68]
 
     for ci, (h, w) in enumerate(zip(headers, col_widths), 1):
         cell = ws.cell(row=3, column=ci, value=h)
@@ -454,62 +480,79 @@ def generar_excel(df, fecha_str):
     border = Border(left=thin, right=thin, top=thin, bottom=thin)
 
     for ri, row in df.iterrows():
-        er     = ri + 4
-        estado = row['Estado compra']
-        bg, fc = ESTADO_COL.get(estado, ('FFFFFF','000000'))
-        alt    = ri % 2 == 1
-        desc   = row['_desc']
+        prioridad = ri + 1
+        er        = ri + 4
+        est_val   = row['Estado compra']
+        bg, fc    = ESTADO_COL.get(est_val, ('FFFFFF','000000'))
+        alt       = ri % 2 == 1
+        desc      = row['_desc']
         if   desc >= 0.50: dbg, dfc = 'FFCCCC','C00000'
         elif desc >= 0.40: dbg, dfc = 'FFE5CC','9C5700'
         else:              dbg, dfc = 'FFFFCC','7D6608'
 
-        vals = [row['Codigo'], row['Descripcion'], row['Modelo aplicacion'],
-                row['Tendencia'], row['Stock real'],
-                '%.0f%%' % (desc*100), row['_precio_of'],
-                row['Cant recomendada'], estado, row['Motivo']]
+        vals = [
+            prioridad,
+            row['Codigo'], row['Descripcion'], row['Modelo aplicacion'],
+            row['Tendencia'], row['Stock real'],
+            '%.0f%%' % (desc*100), row['_precio_of'],
+            row['Cant recomendada'], row['Inversion'],
+            est_val, row['Motivo']
+        ]
 
         for ci, val in enumerate(vals, 1):
             cell = ws.cell(row=er, column=ci, value=val)
             cell.border = border
-            if alt and ci not in [9]: cell.fill = PatternFill('solid', start_color=COLOR_ALT)
-            if ci == 9:
-                cell.fill = PatternFill('solid', start_color=bg)
-                cell.font = Font(name='Arial', bold=True, size=9, color=fc)
-                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            elif ci == 6:
-                cell.fill = PatternFill('solid', start_color=dbg)
-                cell.font = Font(name='Arial', bold=True, size=10, color=dfc)
+            if alt and ci not in [11]:
+                cell.fill = PatternFill('solid', start_color=COLOR_ALT)
+
+            if ci == 1:   # Prioridad
+                cell.font = Font(name='Arial', bold=True, size=9, color='888888')
                 cell.alignment = Alignment(horizontal='center', vertical='center')
-            elif ci == 4:
+            elif ci == 2:   # Codigo
+                cell.font = Font(name='Arial', bold=True, size=9)
+            elif ci == 5:   # Tendencia
                 cell.font = Font(name='Arial', bold=True, size=9,
                                  color=TREND_COL.get(row['Tendencia'],'000000'))
                 cell.alignment = Alignment(horizontal='center', vertical='center')
-            elif ci == 8:
+            elif ci == 7:   # Desc. Promo
+                cell.fill = PatternFill('solid', start_color=dbg)
+                cell.font = Font(name='Arial', bold=True, size=10, color=dfc)
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+            elif ci == 9:   # Cant recomendada
                 color_c = 'C00000' if val > 0 else '276221'
                 cell.font = Font(name='Arial', bold=True, size=11, color=color_c)
                 cell.alignment = Alignment(horizontal='center', vertical='center')
                 if row['_interm'] and val > 0:
                     cell.fill = PatternFill('solid', start_color='FFF2CC')
-            elif ci in [5, 7]:
+            elif ci == 10:  # Inversión
+                cell.font = Font(name='Arial', bold=True, size=9,
+                                 color='1F3864' if val > 0 else '888888')
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.number_format = '#,##0.00'
+            elif ci == 11:  # Estado
+                cell.fill = PatternFill('solid', start_color=bg)
+                cell.font = Font(name='Arial', bold=True, size=9, color=fc)
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            elif ci in [6, 8]:  # Stock real, Precio Oferta
                 cell.font = Font(name='Arial', size=9)
                 cell.alignment = Alignment(horizontal='center', vertical='center')
-            elif ci == 1:
-                cell.font = Font(name='Arial', bold=True, size=9)
             else:
                 cell.font = Font(name='Arial', size=9)
                 cell.alignment = Alignment(vertical='center', wrap_text=True)
+
         ws.row_dimensions[er].height = 44 if len(str(row['Motivo'])) > 100 else 32
 
     # Hoja resumen
     ws2 = wb.create_sheet('RESUMEN')
-    ws2.merge_cells('A1:E1')
+    ws2.merge_cells('A1:F1')
     ws2['A1'].value = 'RESUMEN — XR MOTO STORE — TOP 60  |  %s' % fecha_str
     ws2['A1'].font  = Font(name='Arial', bold=True, size=12, color='FFFFFF')
     ws2['A1'].fill  = PatternFill('solid', start_color=COLOR_HDR)
     ws2['A1'].alignment = Alignment(horizontal='center', vertical='center')
     ws2.row_dimensions[1].height = 24
 
-    for ci, h in enumerate(['Estado','N productos','Unidades a pedir','Ahorro estimado (USD)','Desc. promedio'],1):
+    for ci, h in enumerate(['Estado','N productos','Unidades a pedir',
+                             'Inversión total (USD)','Ahorro estimado (USD)','Desc. promedio'], 1):
         c = ws2.cell(row=2, column=ci, value=h)
         c.font = Font(name='Arial', bold=True, size=10, color='FFFFFF')
         c.fill = PatternFill('solid', start_color='404040')
@@ -518,10 +561,11 @@ def generar_excel(df, fecha_str):
     for ri2, est in enumerate(['SIN STOCK / PEDIR','STOCK BAJO / PEDIR','COMPLETAR STOCK','STOCK SUFICIENTE'], 3):
         sub = df[df['Estado compra'] == est]
         bg2, fc2 = ESTADO_COL.get(est,('FFFFFF','000000'))
-        ahorro = ((sub['_precio_pub'] - sub['_precio_of']) * sub['Cant recomendada'].clip(lower=0)).sum()
-        dp = sub['_desc'].mean()*100 if len(sub) else 0
+        inversion = sub[sub['Cant recomendada'] > 0]['Inversion'].sum()
+        ahorro    = ((sub['_precio_pub'] - sub['_precio_of']) * sub['Cant recomendada'].clip(lower=0)).sum()
+        dp        = sub['_desc'].mean()*100 if len(sub) else 0
         for ci, val in enumerate([est, len(sub), int(sub['Cant recomendada'].sum()),
-                                   round(ahorro,2), '%.1f%%' % dp], 1):
+                                   round(inversion,2), round(ahorro,2), '%.1f%%' % dp], 1):
             c = ws2.cell(row=ri2, column=ci, value=val)
             c.fill = PatternFill('solid', start_color=bg2)
             c.font = Font(name='Arial', bold=(ci==1), size=10, color=fc2)
@@ -529,16 +573,18 @@ def generar_excel(df, fecha_str):
             c.border = border
 
     sub_t  = df[df['Cant recomendada'] > 0]
+    inv_t  = sub_t['Inversion'].sum()
     ah_t   = ((sub_t['_precio_pub'] - sub_t['_precio_of']) * sub_t['Cant recomendada']).sum()
     for ci, val in enumerate(['TOTAL', len(sub_t), int(sub_t['Cant recomendada'].sum()),
-                               round(ah_t,2), '%.1f%%' % (df['_desc'].mean()*100)],1):
+                               round(inv_t,2), round(ah_t,2),
+                               '%.1f%%' % (df['_desc'].mean()*100)], 1):
         c = ws2.cell(row=7, column=ci, value=val)
         c.font = Font(name='Arial', bold=True, size=10, color='FFFFFF')
         c.fill = PatternFill('solid', start_color='1F3864')
         c.alignment = Alignment(horizontal='center', vertical='center')
         c.border = border
 
-    for ci2, w in enumerate([28,14,18,20,14],1):
+    for ci2, w in enumerate([28, 14, 18, 20, 20, 14], 1):
         ws2.column_dimensions[get_column_letter(ci2)].width = w
 
     buf = io.BytesIO()
@@ -595,15 +641,15 @@ if crear and archivos_ok:
             unsafe_allow_html=True)
     with m3:
         total_u = int(df_pedir['Cant recomendada'].sum())
+        inv_total = df_pedir['Inversion'].sum()
         st.markdown(f"""<div class="metric-card blue">
             <div class="metric-value">{total_u:,}</div>
             <div class="metric-label">Unidades a pedir</div></div>""",
             unsafe_allow_html=True)
     with m4:
-        ahorro = ((df_pedir['_precio_pub'] - df_pedir['_precio_of']) * df_pedir['Cant recomendada']).sum()
-        st.markdown(f"""<div class="metric-card green">
-            <div class="metric-value">$ {ahorro:,.0f}</div>
-            <div class="metric-label">Ahorro estimado (USD)</div></div>""",
+        st.markdown(f"""<div class="metric-card orange">
+            <div class="metric-value">$ {inv_total:,.0f}</div>
+            <div class="metric-label">Inversión estimada (USD)</div></div>""",
             unsafe_allow_html=True)
 
     st.markdown('<div style="margin-top:24px"></div>', unsafe_allow_html=True)
@@ -630,8 +676,8 @@ if crear and archivos_ok:
         return COLORES_ESTADO.get(val, '')
 
     df_show = df_vista[['Codigo','Descripcion','Tendencia','Stock real',
-                         'Cant recomendada','Estado compra']].copy()
-    df_show.columns = ['Código','Descripción','Tendencia','Stock','Cant. Pedir','Estado']
+                         'Cant recomendada','Inversion','Estado compra']].copy()
+    df_show.columns = ['Código','Descripción','Tendencia','Stock','Cant. Pedir','Inversión (USD)','Estado']
     df_show = df_show.reset_index(drop=True)
     df_show.index += 1
 
