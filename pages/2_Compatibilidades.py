@@ -29,13 +29,12 @@ df_rep = cargar_datos()
 
 # ── BUSCADOR ──────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="background:#F8F8F8;border:1px solid #E0E0E0;border-left:4px solid #005BAC;
-            border-radius:10px;padding:20px 24px;margin-bottom:24px">
-    <div style="font-size:1rem;color:#333;margin-bottom:4px">
-        💡 <b>¿Cómo buscar?</b> Escribe el modelo, nombre del repuesto o código.
-        Puedes combinar términos: <code>XR190 freno</code>, <code>pastilla CB300</code>, <code>12391K70601</code>
-    </div>
-</div>
+<p style="color:#888;font-size:0.85rem;margin-bottom:16px">
+    Escribe el modelo, nombre del repuesto o código. Puedes combinar términos:
+    <code style="background:#F0F0F0;padding:1px 5px;border-radius:3px">XR190 freno</code> &nbsp;·&nbsp;
+    <code style="background:#F0F0F0;padding:1px 5px;border-radius:3px">pastilla CB300</code> &nbsp;·&nbsp;
+    <code style="background:#F0F0F0;padding:1px 5px;border-radius:3px">12391K70601</code>
+</p>
 """, unsafe_allow_html=True)
 
 col_search, col_btn = st.columns([5, 1])
