@@ -1,5 +1,9 @@
 import streamlit as st
 import pandas as pd
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+import io
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -157,8 +161,75 @@ elif not query.strip():
                         cursor:pointer;text-align:center">{modelo}</div>
             """, unsafe_allow_html=True)
 
-# ── INFO AMPLIACIÓN ───────────────────────────────────────────────────────────
+# ── DESCARGA BASE COMPLETA ────────────────────────────────────────────────────
 st.markdown('<div style="margin-top:32px"></div>', unsafe_allow_html=True)
+st.markdown('<hr style="border:none;border-top:1px solid #EEE;margin-bottom:20px">', unsafe_allow_html=True)
+
+def generar_excel_base(df):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Base de Repuestos'
+
+    ws.merge_cells('A1:D1')
+    c = ws['A1']
+    c.value = 'XR MOTO STORE — BASE DE COMPATIBILIDADES DE REPUESTOS HONDA'
+    c.font = Font(name='Arial', bold=True, size=12, color='FFFFFF')
+    c.fill = PatternFill('solid', start_color='CC0000')
+    c.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].height = 24
+
+    headers = ['Código', 'Descripción', 'Modelos Compatibles', 'Fuente']
+    widths  = [20, 38, 80, 30]
+    thin = Side(style='thin', color='D9D9D9')
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    for ci, (h, w) in enumerate(zip(headers, widths), 1):
+        cell = ws.cell(row=2, column=ci, value=h)
+        cell.font = Font(name='Arial', bold=True, size=10, color='FFFFFF')
+        cell.fill = PatternFill('solid', start_color='404040')
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        ws.column_dimensions[get_column_letter(ci)].width = w
+    ws.row_dimensions[2].height = 20
+
+    for ri, row in df.iterrows():
+        er = ri + 3
+        alt = ri % 2 == 0
+        vals = [row['Codigo'], row['Descripcion'], row['Modelos'], row['Fuente']]
+        for ci, val in enumerate(vals, 1):
+            cell = ws.cell(row=er, column=ci, value=val)
+            cell.border = border
+            cell.font = Font(name='Arial', size=9)
+            cell.alignment = Alignment(vertical='center', wrap_text=(ci == 3))
+            if alt:
+                cell.fill = PatternFill('solid', start_color='F5F5F5')
+            if ci == 1:
+                cell.font = Font(name='Arial', bold=True, size=9, color='333333')
+        ws.row_dimensions[er].height = 18
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+col_dl, col_info = st.columns([1, 2])
+with col_dl:
+    excel_base = generar_excel_base(df_rep[['Codigo','Descripcion','Modelos','Fuente']])
+    st.download_button(
+        label="⬇️  Descargar base completa (Excel)",
+        data=excel_base,
+        file_name="XR_Base_Compatibilidades.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+    )
+with col_info:
+    st.markdown(f"""
+    <p style="color:#888;font-size:0.85rem;margin-top:8px">
+        Descarga la base completa con <b>{len(df_rep)} repuestos</b>, sus códigos Honda,
+        descripciones y todos los modelos compatibles encontrados hasta la fecha.
+    </p>
+    """, unsafe_allow_html=True)
+
+st.markdown('<div style="margin-top:16px"></div>', unsafe_allow_html=True)
 with st.expander("ℹ️  ¿Cómo se amplía la base de datos?"):
     st.markdown("""
     La base actual tiene **302 repuestos** de la Lista Promo Mayo 2026.
