@@ -20,11 +20,11 @@ st.set_page_config(
 st.markdown("""
 <style>
 /* Fondo general */
-.stApp { background-color: #1A1A1A; }
+.stApp { background-color: #FFFFFF; }
 
 /* Header principal */
 .xr-header {
-    background: linear-gradient(135deg, #CC0000 0%, #8B0000 50%, #1A1A1A 100%);
+    background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%);
     border-bottom: 3px solid #CC0000;
     padding: 18px 32px;
     border-radius: 12px;
@@ -41,15 +41,15 @@ st.markdown("""
     letter-spacing: -0.5px;
 }
 .xr-header p {
-    color: #CCCCCC;
+    color: #FFCCCC;
     font-size: 0.9rem;
     margin: 4px 0 0 0;
 }
 
 /* Tarjetas de carga */
 .upload-card {
-    background: #242424;
-    border: 1.5px solid #333333;
+    background: #FAFAFA;
+    border: 1.5px solid #E0E0E0;
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 12px;
@@ -65,18 +65,21 @@ st.markdown("""
     margin: 0 0 4px 0;
 }
 .upload-card p {
-    color: #999999;
+    color: #888888;
     font-size: 0.78rem;
     margin: 0 0 12px 0;
 }
 
 /* Métricas */
 .metric-card {
-    background: #242424;
+    background: #FAFAFA;
     border-radius: 10px;
     padding: 18px 22px;
     border-left: 4px solid #CC0000;
+    border: 1px solid #EEEEEE;
+    border-left: 4px solid #CC0000;
     text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .metric-card.blue  { border-left-color: #005BAC; }
 .metric-card.green { border-left-color: #00A651; }
@@ -84,12 +87,12 @@ st.markdown("""
 .metric-value {
     font-size: 2rem;
     font-weight: 800;
-    color: #FFFFFF;
+    color: #1A1A1A;
     line-height: 1;
 }
 .metric-label {
     font-size: 0.75rem;
-    color: #AAAAAA;
+    color: #888888;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-top: 6px;
@@ -130,7 +133,7 @@ st.markdown("""
 /* Divider */
 .xr-divider {
     border: none;
-    border-top: 1px solid #333333;
+    border-top: 1px solid #EEEEEE;
     margin: 24px 0;
 }
 
@@ -143,11 +146,11 @@ st.markdown("""
 /* Footer */
 .xr-footer {
     text-align: center;
-    color: #555555;
+    color: #AAAAAA;
     font-size: 0.75rem;
     margin-top: 40px;
     padding-top: 16px;
-    border-top: 1px solid #2A2A2A;
+    border-top: 1px solid #EEEEEE;
 }
 </style>
 """, unsafe_allow_html=True)
