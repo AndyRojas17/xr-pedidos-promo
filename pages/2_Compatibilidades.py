@@ -149,17 +149,17 @@ elif not query.strip():
 
     st.markdown('<div style="margin-top:28px"></div>', unsafe_allow_html=True)
 
-    # Modelos disponibles
-    st.markdown("#### Modelos con repuestos en la base")
-    modelos_sorted = sorted(modelos_unicos)
-    cols = st.columns(5)
-    for i, modelo in enumerate(modelos_sorted):
-        with cols[i % 5]:
-            st.markdown(f"""
-            <div style="background:#F0F4FF;color:#1A4FAE;padding:4px 10px;border-radius:8px;
-                        font-size:0.82rem;font-weight:600;margin-bottom:6px;
-                        cursor:pointer;text-align:center">{modelo}</div>
-            """, unsafe_allow_html=True)
+    # Modelos disponibles (colapsado por defecto)
+    with st.expander(f"Ver modelos con repuestos en la base ({len(modelos_unicos)} modelos)"):
+        modelos_sorted = sorted(modelos_unicos)
+        cols = st.columns(5)
+        for i, modelo in enumerate(modelos_sorted):
+            with cols[i % 5]:
+                st.markdown(f"""
+                <div style="background:#F0F4FF;color:#1A4FAE;padding:4px 10px;border-radius:8px;
+                            font-size:0.82rem;font-weight:600;margin-bottom:6px;
+                            text-align:center">{modelo}</div>
+                """, unsafe_allow_html=True)
 
 # ── DESCARGA BASE COMPLETA ────────────────────────────────────────────────────
 st.markdown('<div style="margin-top:32px"></div>', unsafe_allow_html=True)
