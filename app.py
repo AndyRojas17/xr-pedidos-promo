@@ -39,7 +39,10 @@ st.markdown("""
 .xr-card.red  { border-top: 4px solid #CC0000; }
 .xr-card.blue { border-top: 4px solid #005BAC; }
 /* Quitar subrayado de todo el contenido interno */
-.xr-card * { text-decoration: none !important; }
+.xr-card, .xr-card:link, .xr-card:visited, .xr-card:hover, .xr-card:active,
+.xr-card *, .xr-card *:link, .xr-card *:visited, .xr-card *:hover {
+    text-decoration: none !important;
+}
 .xr-card-icon  { font-size: 2.2rem; margin-bottom: 10px; }
 .xr-card-title { font-size: 1.2rem; font-weight: 800; color: #1A1A1A; }
 .xr-card-desc  { color: #666; font-size: 0.9rem; margin-top: 8px; line-height: 1.5; }
