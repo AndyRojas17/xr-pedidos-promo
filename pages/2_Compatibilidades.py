@@ -213,19 +213,26 @@ def generar_excel_base(df):
 
 col_dl, col_info = st.columns([1, 2])
 with col_dl:
-    excel_base = generar_excel_base(df_rep[['Codigo','Descripcion','Modelos','Fuente']])
-    st.download_button(
-        label="⬇️  Descargar base completa (Excel)",
-        data=excel_base,
-        file_name="XR_Base_Compatibilidades.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-    )
+    clave = st.text_input("🔒 Clave de administrador", type="password",
+                          placeholder="Ingresa la clave para descargar")
+    if clave == "xr3010":
+        excel_base = generar_excel_base(df_rep[['Codigo','Descripcion','Modelos','Fuente']])
+        st.download_button(
+            label="⬇️  Descargar base completa (Excel)",
+            data=excel_base,
+            file_name="XR_Base_Compatibilidades.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
+    elif clave:
+        st.markdown('<p style="color:#CC0000;font-size:0.82rem;margin-top:4px">Clave incorrecta.</p>',
+                    unsafe_allow_html=True)
 with col_info:
     st.markdown(f"""
     <p style="color:#888;font-size:0.85rem;margin-top:8px">
         Descarga la base completa con <b>{len(df_rep)} repuestos</b>, sus códigos Honda,
         descripciones y todos los modelos compatibles encontrados hasta la fecha.
+        Solo disponible para administradores.
     </p>
     """, unsafe_allow_html=True)
 
