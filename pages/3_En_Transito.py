@@ -104,40 +104,22 @@ if query.strip():
             paty_badge    = ' &nbsp;<span style="background:#E8F5E9;color:#2E7D32;padding:1px 7px;border-radius:8px;font-size:0.72rem;font-weight:700">Sugerido Paty</span>' if row['Fuente_Paty'] == 'Si' else ''
 
             if en_transito:
-                borde_color = '#2E7D32'
-                estado_bg   = '#E8F5E9'
-                estado_fg   = '#2E7D32'
-                estado_txt  = '✅ En Tránsito'
-                detalle_html = f"""
-                    <span style="font-size:0.8rem;color:#666">
-                        📦 <b style="color:#1A1A1A">{cantidad_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#666">
-                        💲 Precio: <b>{precio_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#666">
-                        🏷️ Desc.: <b style="color:#CC0000">{desc_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#666">
-                        💰 Total pedido: <b style="color:#2E7D32">{total_str}</b>
-                    </span>
-                """
+                borde_color  = '#2E7D32'
+                estado_bg    = '#E8F5E9'
+                estado_fg    = '#2E7D32'
+                estado_txt   = '✅ En Tránsito'
+                detalle_html = (f'<span style="font-size:0.8rem;color:#666">📦 <b style="color:#1A1A1A">{cantidad_str}</b></span>'
+                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">💲 Precio: <b>{precio_str}</b></span>'
+                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">🏷️ Desc.: <b style="color:#CC0000">{desc_str}</b></span>'
+                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">💰 Total: <b style="color:#2E7D32">{total_str}</b></span>')
             else:
-                borde_color = '#AAAAAA'
-                estado_bg   = '#F5F5F5'
-                estado_fg   = '#888888'
-                estado_txt  = '⚠️ No solicitado'
-                detalle_html = f"""
-                    <span style="font-size:0.8rem;color:#666">
-                        💲 Precio lista: <b>{precio_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#666">
-                        🏷️ Desc. promo: <b style="color:#CC0000">{desc_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#888;font-style:italic">
-                        Este repuesto no fue incluido en el pedido.
-                    </span>
-                """
+                borde_color  = '#AAAAAA'
+                estado_bg    = '#F5F5F5'
+                estado_fg    = '#888888'
+                estado_txt   = '⚠️ No solicitado'
+                detalle_html = (f'<span style="font-size:0.8rem;color:#666">💲 Precio lista: <b>{precio_str}</b></span>'
+                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">🏷️ Desc. promo: <b style="color:#CC0000">{desc_str}</b></span>'
+                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#888;font-style:italic">Este repuesto no fue incluido en el pedido.</span>')
 
             st.markdown(f"""
             <div style="background:#FAFAFA;border:1px solid #E5E5E5;
