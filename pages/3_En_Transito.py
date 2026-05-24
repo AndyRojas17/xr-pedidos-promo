@@ -100,7 +100,7 @@ if query.strip():
             precio_str    = f"S/. {row['Precio']:.2f}"   if pd.notna(row['Precio'])    else '—'
             desc_str      = f"{row['Descuento']*100:.1f}%" if pd.notna(row['Descuento']) else '—'
             cantidad_str  = f"{int(row['Cantidad'])} uds"
-            total_str     = f"S/. {row['Total']:,.2f}"   if pd.notna(row['Total'])     else '—'
+            # total_str no se usa en tarjetas
             paty_badge    = ' &nbsp;<span style="background:#E8F5E9;color:#2E7D32;padding:1px 7px;border-radius:8px;font-size:0.72rem;font-weight:700">Sugerido Paty</span>' if row['Fuente_Paty'] == 'Si' else ''
 
             if en_transito:
@@ -145,7 +145,7 @@ else:
     for _, row in df_transito.iterrows():
         precio_str = f"S/. {row['Precio']:.2f}" if pd.notna(row['Precio']) else '—'
         desc_str   = f"{row['Descuento']*100:.1f}%" if pd.notna(row['Descuento']) else '—'
-        total_str  = f"S/. {row['Total']:,.2f}" if pd.notna(row['Total']) else '—'
+        # total_str no se usa en tarjetas
         paty_badge = ' &nbsp;<span style="background:#E8F5E9;color:#2E7D32;padding:1px 7px;border-radius:8px;font-size:0.72rem;font-weight:700">Sugerido Paty</span>' if row['Fuente_Paty'] == 'Si' else ''
 
         card = (
