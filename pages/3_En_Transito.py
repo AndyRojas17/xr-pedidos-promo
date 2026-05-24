@@ -33,31 +33,11 @@ def cargar_datos():
 df = cargar_datos()
 df_transito = df[df['Estado'] == 'En Transito']
 
-# ── MÉTRICAS ─────────────────────────────────────────────────────────────────
+# variables para uso en descarga excel
 total_items     = len(df_transito)
-total_unidades  = int(df_transito['Cantidad'].sum())
 total_inversion = df_transito['Total'].sum()
-paty_count      = len(df_transito[df_transito['Fuente_Paty'] == 'Si'])
 
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    st.markdown(f"""<div class="metric-card blue">
-        <div class="metric-value">{total_items}</div>
-        <div class="metric-label">Ítems pedidos</div></div>""", unsafe_allow_html=True)
-with c2:
-    st.markdown(f"""<div class="metric-card">
-        <div class="metric-value">{total_unidades:,.0f}</div>
-        <div class="metric-label">Unidades en tránsito</div></div>""", unsafe_allow_html=True)
-with c3:
-    st.markdown(f"""<div class="metric-card red">
-        <div class="metric-value">S/. {total_inversion:,.0f}</div>
-        <div class="metric-label">Inversión total</div></div>""", unsafe_allow_html=True)
-with c4:
-    st.markdown(f"""<div class="metric-card green">
-        <div class="metric-value">{paty_count}</div>
-        <div class="metric-label">Sugeridos por Paty</div></div>""", unsafe_allow_html=True)
-
-st.markdown('<div style="margin-top:24px"></div>', unsafe_allow_html=True)
+st.markdown('<div style="margin-top:8px"></div>', unsafe_allow_html=True)
 
 # ── BUSCADOR ─────────────────────────────────────────────────────────────────
 st.markdown("""
