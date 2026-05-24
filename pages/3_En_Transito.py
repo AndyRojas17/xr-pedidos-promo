@@ -110,8 +110,7 @@ if query.strip():
                 estado_txt   = '✅ En Tránsito'
                 detalle_html = (f'<span style="font-size:0.8rem;color:#666">📦 <b style="color:#1A1A1A">{cantidad_str}</b></span>'
                                 f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">💲 Precio: <b>{precio_str}</b></span>'
-                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">🏷️ Desc.: <b style="color:#CC0000">{desc_str}</b></span>'
-                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">💰 Total: <b style="color:#2E7D32">{total_str}</b></span>')
+                                f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">🏷️ Desc.: <b style="color:#CC0000">{desc_str}</b></span>')
             else:
                 borde_color  = '#AAAAAA'
                 estado_bg    = '#F5F5F5'
@@ -160,7 +159,6 @@ else:
             f'<span style="font-size:0.8rem;color:#666">📦 <b>{int(row["Cantidad"])} uds</b></span>'
             f'<span style="font-size:0.8rem;color:#666">💲 <b>{precio_str}</b></span>'
             f'<span style="font-size:0.8rem;color:#666">🏷️ <b style="color:#CC0000">{desc_str}</b></span>'
-            f'<span style="font-size:0.8rem;font-weight:700;color:#2E7D32">{total_str}</span>'
             f'</div></div></div>'
         )
         st.markdown(card, unsafe_allow_html=True)
