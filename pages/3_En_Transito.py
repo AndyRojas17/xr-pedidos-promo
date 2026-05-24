@@ -121,33 +121,22 @@ if query.strip():
                                 f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#666">🏷️ Desc. promo: <b style="color:#CC0000">{desc_str}</b></span>'
                                 f'&nbsp;&nbsp;<span style="font-size:0.8rem;color:#888;font-style:italic">Este repuesto no fue incluido en el pedido.</span>')
 
-            st.markdown(f"""
-            <div style="background:#FAFAFA;border:1px solid #E5E5E5;
-                        border-left:4px solid {borde_color};
-                        border-radius:8px;padding:14px 20px;margin-bottom:8px">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
-                    <div style="flex:1;min-width:200px">
-                        <span style="font-family:monospace;background:#F0F0F0;color:#333;
-                                     padding:2px 8px;border-radius:4px;font-size:0.85rem;
-                                     font-weight:700">{row['Codigo']}</span>
-                        <span style="font-size:0.95rem;font-weight:700;color:#1A1A1A;
-                                     margin-left:10px">{row['Descripcion']}</span>
-                        {paty_badge}
-                    </div>
-                    <span style="background:{estado_bg};color:{estado_fg};padding:3px 12px;
-                                 border-radius:10px;font-size:0.78rem;font-weight:700;
-                                 white-space:nowrap">{estado_txt}</span>
-                </div>
-                <div style="margin-top:4px;margin-bottom:8px">
-                    <span style="font-size:0.78rem;color:#888">
-                        🏍️ {row['Modelo'] if row['Modelo'] else '—'}
-                    </span>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
-                    {detalle_html}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            modelo_txt = row['Modelo'] if row['Modelo'] else '—'
+            card = (
+                f'<div style="background:#FAFAFA;border:1px solid #E5E5E5;border-left:4px solid {borde_color};border-radius:8px;padding:14px 20px;margin-bottom:8px">'
+                f'<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:6px">'
+                f'<div style="flex:1;min-width:200px">'
+                f'<span style="font-family:monospace;background:#F0F0F0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.85rem;font-weight:700">{row["Codigo"]}</span>'
+                f'<span style="font-size:0.95rem;font-weight:700;color:#1A1A1A;margin-left:10px">{row["Descripcion"]}</span>'
+                f'{paty_badge}'
+                f'</div>'
+                f'<span style="background:{estado_bg};color:{estado_fg};padding:3px 12px;border-radius:10px;font-size:0.78rem;font-weight:700;white-space:nowrap">{estado_txt}</span>'
+                f'</div>'
+                f'<div style="margin-bottom:8px"><span style="font-size:0.78rem;color:#888">🏍️ {modelo_txt}</span></div>'
+                f'<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">{detalle_html}</div>'
+                f'</div>'
+            )
+            st.markdown(card, unsafe_allow_html=True)
 
 else:
     # Estado inicial — mostrar ítems en tránsito
@@ -160,35 +149,21 @@ else:
         total_str  = f"S/. {row['Total']:,.2f}" if pd.notna(row['Total']) else '—'
         paty_badge = ' &nbsp;<span style="background:#E8F5E9;color:#2E7D32;padding:1px 7px;border-radius:8px;font-size:0.72rem;font-weight:700">Sugerido Paty</span>' if row['Fuente_Paty'] == 'Si' else ''
 
-        st.markdown(f"""
-        <div style="background:#FAFAFA;border:1px solid #E5E5E5;border-left:4px solid #2E7D32;
-                    border-radius:8px;padding:12px 20px;margin-bottom:6px">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-                <div style="flex:1;min-width:200px">
-                    <span style="font-family:monospace;background:#F0F0F0;color:#333;
-                                 padding:2px 8px;border-radius:4px;font-size:0.82rem;
-                                 font-weight:700">{row['Codigo']}</span>
-                    <span style="font-size:0.9rem;font-weight:700;color:#1A1A1A;
-                                 margin-left:10px">{row['Descripcion']}</span>
-                    {paty_badge}
-                </div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-                    <span style="font-size:0.8rem;color:#666">
-                        📦 <b>{int(row['Cantidad'])} uds</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#666">
-                        💲 <b>{precio_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;color:#666">
-                        🏷️ <b style="color:#CC0000">{desc_str}</b>
-                    </span>
-                    <span style="font-size:0.8rem;font-weight:700;color:#2E7D32">
-                        {total_str}
-                    </span>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        card = (
+            f'<div style="background:#FAFAFA;border:1px solid #E5E5E5;border-left:4px solid #2E7D32;border-radius:8px;padding:12px 20px;margin-bottom:6px">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'
+            f'<div style="flex:1;min-width:200px">'
+            f'<span style="font-family:monospace;background:#F0F0F0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.82rem;font-weight:700">{row["Codigo"]}</span>'
+            f'<span style="font-size:0.9rem;font-weight:700;color:#1A1A1A;margin-left:10px">{row["Descripcion"]}</span>'
+            f'{paty_badge}</div>'
+            f'<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">'
+            f'<span style="font-size:0.8rem;color:#666">📦 <b>{int(row["Cantidad"])} uds</b></span>'
+            f'<span style="font-size:0.8rem;color:#666">💲 <b>{precio_str}</b></span>'
+            f'<span style="font-size:0.8rem;color:#666">🏷️ <b style="color:#CC0000">{desc_str}</b></span>'
+            f'<span style="font-size:0.8rem;font-weight:700;color:#2E7D32">{total_str}</span>'
+            f'</div></div></div>'
+        )
+        st.markdown(card, unsafe_allow_html=True)
 
 # ── DESCARGA ──────────────────────────────────────────────────────────────────
 st.markdown('<div style="margin-top:32px"></div>', unsafe_allow_html=True)
