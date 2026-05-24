@@ -36,8 +36,9 @@ st.markdown("""
     border-color: #BBBBBB;
     text-decoration: none;
 }
-.xr-card.red  { border-top: 4px solid #CC0000; }
-.xr-card.blue { border-top: 4px solid #005BAC; }
+.xr-card.red   { border-top: 4px solid #CC0000; }
+.xr-card.blue  { border-top: 4px solid #005BAC; }
+.xr-card.green { border-top: 4px solid #2E7D32; }
 /* Quitar subrayado de todo el contenido interno */
 .xr-card, .xr-card:link, .xr-card:visited, .xr-card:hover, .xr-card:active,
 .xr-card *, .xr-card *:link, .xr-card *:visited, .xr-card *:hover {
@@ -48,9 +49,13 @@ st.markdown("""
 .xr-card-desc  { color: #666; font-size: 0.9rem; margin-top: 8px; line-height: 1.5; }
 .xr-card-arrow { display: inline-block; margin-top: 16px; font-size: 0.9rem;
                   font-weight: 700; color: #CC0000; }
-.xr-card.blue .xr-card-arrow { color: #005BAC; }
+.xr-card.blue  .xr-card-arrow { color: #005BAC; }
+.xr-card.green .xr-card-arrow { color: #2E7D32; }
 /* Responsive: en móvil apilar las tarjetas verticalmente */
-.xr-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.xr-cards-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) {
+    .xr-cards-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+}
 @media (max-width: 640px) {
     .xr-cards-grid { grid-template-columns: 1fr; gap: 16px; }
     .xr-card { padding: 20px 18px; }
@@ -77,6 +82,16 @@ st.markdown("""
       o nombre del repuesto y encuentra todo lo que le aplica.
     </div>
     <div class="xr-card-arrow">Ir a Compatibilidades →</div>
+  </a>
+
+  <a href="/En_Transito" class="xr-card green">
+    <div class="xr-card-icon">📦</div>
+    <div class="xr-card-title">En Tránsito</div>
+    <div class="xr-card-desc">
+      Consulta los pedidos realizados recientemente. Muestra ítems,
+      cantidades, precios y la inversión total en camino.
+    </div>
+    <div class="xr-card-arrow">Ir a En Tránsito →</div>
   </a>
 
 </div>
