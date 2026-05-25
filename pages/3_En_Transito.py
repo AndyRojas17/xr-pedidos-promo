@@ -39,6 +39,47 @@ total_inversion = df_transito['Total'].sum()
 
 st.markdown('<div style="margin-top:8px"></div>', unsafe_allow_html=True)
 
+# ── CARGAR NUEVA LISTA ────────────────────────────────────────────────────────
+with st.expander("🔄  Cargar nueva lista de pedidos"):
+    st.markdown('<p style="color:#888;font-size:0.85rem;margin-bottom:4px">Solo administradores. La lista actual se reemplaza al procesar.</p>', unsafe_allow_html=True)
+
+    clave_up = st.text_input("🔒 Clave", type="password",
+                             placeholder="Clave de administrador",
+                             key="clave_upload")
+
+    if clave_up == "xr3010":
+        st.markdown('<div style="margin-top:8px"></div>', unsafe_allow_html=True)
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            st.markdown('<p style="font-size:0.85rem;font-weight:700;margin-bottom:4px">📋 Lista Promocional Honda <span style="color:#CC0000">*</span></p>', unsafe_allow_html=True)
+            promo_file = st.file_uploader("Lista Promo", type=['xlsx','xls'],
+                                          label_visibility="collapsed", key="upload_promo")
+        with col_f2:
+            st.markdown('<p style="font-size:0.85rem;font-weight:700;margin-bottom:4px">📋 Sugeridos Paty <span style="color:#888;font-weight:400">(opcional)</span></p>', unsafe_allow_html=True)
+            paty_file  = st.file_uploader("Sugeridos Paty", type=['xlsx','xls'],
+                                          label_visibility="collapsed", key="upload_paty")
+
+        st.markdown('<div style="margin-top:8px"></div>', unsafe_allow_html=True)
+        if st.button("⚙️  Procesar y actualizar lista", use_container_width=False,
+                     disabled=(promo_file is None)):
+            with st.spinner("Procesando..."):
+                try:
+                    promo_bytes = promo_file.read()
+                    paty_bytes  = paty_file.read() if paty_file else None
+                    nuevo_df = procesar_lista(promo_bytes, paty_bytes)
+                    nuevo_df.to_csv(DATA_PATH, index=False, encoding='utf-8')
+                    st.cache_data.clear()
+                    en_t = len(nuevo_df[nuevo_df['Estado'] == 'En Transito'])
+                    st.success(f"✅ Lista actualizada: **{len(nuevo_df)} ítems** cargados — **{en_t} en tránsito**. Recarga la página para ver los cambios.")
+                except Exception as e:
+                    st.error(f"Error al procesar: {e}")
+
+    elif clave_up:
+        st.markdown('<p style="color:#CC0000;font-size:0.82rem;margin-top:4px">Clave incorrecta.</p>',
+                    unsafe_allow_html=True)
+
+st.markdown('<div style="margin-top:4px"></div>', unsafe_allow_html=True)
+
 # ── BUSCADOR ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <p style="color:#888;font-size:0.85rem;margin-bottom:12px">
@@ -227,9 +268,6 @@ with col_info:
     </p>
     """, unsafe_allow_html=True)
 
-# ── CARGAR NUEVA LISTA ────────────────────────────────────────────────────────
-st.markdown('<div style="margin-top:12px"></div>', unsafe_allow_html=True)
-
 def detectar_hoja_y_skip(bytes_data):
     """Detecta la hoja correcta y la fila de encabezados en cualquier Excel de lista promo."""
     wb_tmp = openpyxl.load_workbook(io.BytesIO(bytes_data), read_only=True, data_only=True)
@@ -348,43 +386,5 @@ def procesar_lista(promo_bytes, paty_bytes=None):
 
     cols = ['Codigo', 'Descripcion', 'Modelo', 'Precio', 'Descuento', 'Cantidad', 'Total', 'Estado', 'Fuente_Paty']
     return promo[cols]
-
-with st.expander("🔄  Cargar nueva lista de pedidos"):
-    st.markdown('<p style="color:#888;font-size:0.85rem;margin-bottom:4px">Solo administradores. La lista actual se reemplaza al procesar.</p>', unsafe_allow_html=True)
-
-    clave_up = st.text_input("🔒 Clave", type="password",
-                             placeholder="Clave de administrador",
-                             key="clave_upload")
-
-    if clave_up == "xr3010":
-        st.markdown('<div style="margin-top:8px"></div>', unsafe_allow_html=True)
-        col_f1, col_f2 = st.columns(2)
-        with col_f1:
-            st.markdown('<p style="font-size:0.85rem;font-weight:700;margin-bottom:4px">📋 Lista Promocional Honda <span style="color:#CC0000">*</span></p>', unsafe_allow_html=True)
-            promo_file = st.file_uploader("Lista Promo", type=['xlsx','xls'],
-                                          label_visibility="collapsed", key="upload_promo")
-        with col_f2:
-            st.markdown('<p style="font-size:0.85rem;font-weight:700;margin-bottom:4px">📋 Sugeridos Paty <span style="color:#888;font-weight:400">(opcional)</span></p>', unsafe_allow_html=True)
-            paty_file  = st.file_uploader("Sugeridos Paty", type=['xlsx','xls'],
-                                          label_visibility="collapsed", key="upload_paty")
-
-        st.markdown('<div style="margin-top:8px"></div>', unsafe_allow_html=True)
-        if st.button("⚙️  Procesar y actualizar lista", use_container_width=False,
-                     disabled=(promo_file is None)):
-            with st.spinner("Procesando..."):
-                try:
-                    promo_bytes = promo_file.read()
-                    paty_bytes  = paty_file.read() if paty_file else None
-                    nuevo_df = procesar_lista(promo_bytes, paty_bytes)
-                    nuevo_df.to_csv(DATA_PATH, index=False, encoding='utf-8')
-                    st.cache_data.clear()
-                    en_t = len(nuevo_df[nuevo_df['Estado'] == 'En Transito'])
-                    st.success(f"✅ Lista actualizada: **{len(nuevo_df)} ítems** cargados — **{en_t} en tránsito**. Recarga la página para ver los cambios.")
-                except Exception as e:
-                    st.error(f"Error al procesar: {e}")
-
-    elif clave_up:
-        st.markdown('<p style="color:#CC0000;font-size:0.82rem;margin-top:4px">Clave incorrecta.</p>',
-                    unsafe_allow_html=True)
 
 render_footer()
