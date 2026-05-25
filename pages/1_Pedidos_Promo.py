@@ -235,13 +235,7 @@ def analizar(f_hist, f_promo_, f_stk):
         })
 
     df_all = pd.DataFrame(rows)
-    df_p   = df_all[df_all['Cant recomendada'] > 0].sort_values('_score', ascending=False)
-    df_ok  = df_all[
-        (df_all['Cant recomendada'] == 0) & df_all['_historial'] &
-        (df_all['_stk_months'] < df_all['_cob'] * 2)
-    ].sort_values('_score', ascending=False)
-    n_p    = min(len(df_p), 60)
-    df_rep = pd.concat([df_p.head(n_p), df_ok.head(60-n_p)]).head(60).copy()
+    df_rep = df_all[df_all['Cant recomendada'] > 0].sort_values('_score', ascending=False).copy()
     ORDEN  = {'SIN STOCK / PEDIR':0,'STOCK BAJO / PEDIR':1,'COMPLETAR STOCK':2,'STOCK SUFICIENTE':3}
     df_rep['_orden'] = df_rep['Estado compra'].map(ORDEN)
     df_rep = df_rep.sort_values(['_orden','_score'], ascending=[True,False]).reset_index(drop=True)
@@ -267,7 +261,7 @@ def generar_excel(df, fecha_str):
 
     ws.merge_cells('A1:L1')
     c = ws['A1']
-    c.value = 'XR MOTO STORE — TOP 60 RECOMENDACION DE COMPRA — LISTA PROMOCIONAL  |  %s' % fecha_str
+    c.value = 'XR MOTO STORE — RECOMENDACION DE COMPRA — LISTA PROMOCIONAL  |  %s' % fecha_str
     c.font  = Font(name='Arial', bold=True, size=12, color='FFFFFF')
     c.fill  = PatternFill('solid', start_color=COLOR_HDR)
     c.alignment = Alignment(horizontal='center', vertical='center')
@@ -356,7 +350,7 @@ def generar_excel(df, fecha_str):
 
     ws2 = wb.create_sheet('RESUMEN')
     ws2.merge_cells('A1:F1')
-    ws2['A1'].value = 'RESUMEN — XR MOTO STORE — TOP 60  |  %s' % fecha_str
+    ws2['A1'].value = 'RESUMEN — XR MOTO STORE  |  %s' % fecha_str
     ws2['A1'].font  = Font(name='Arial', bold=True, size=12, color='FFFFFF')
     ws2['A1'].fill  = PatternFill('solid', start_color=COLOR_HDR)
     ws2['A1'].alignment = Alignment(horizontal='center', vertical='center')
@@ -418,7 +412,7 @@ if crear and archivos_ok:
         fecha_str = datetime.now().strftime("%d/%m/%Y")
         excel_buf = generar_excel(df_resultado, fecha_str)
         prog.progress(100)
-        status.markdown("✅ **¡TOP 60 generado exitosamente!**")
+        status.markdown("✅ **¡Recomendación generada exitosamente!**")
 
     st.markdown('<hr style="border:none;border-top:1px solid #EEE;margin:20px 0">', unsafe_allow_html=True)
 
@@ -446,7 +440,8 @@ if crear and archivos_ok:
             <div class="metric-label">Inversión estimada (USD)</div></div>""", unsafe_allow_html=True)
 
     st.markdown('<div style="margin-top:24px"></div>', unsafe_allow_html=True)
-    st.markdown("### 📋 TOP 60 — Vista previa")
+    n_total = len(df_resultado)
+    st.markdown(f"### 📋 {n_total} productos recomendados — Vista previa")
 
     filtro = st.multiselect(
         "Filtrar por estado:",
